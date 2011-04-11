@@ -19,7 +19,7 @@ class GithubFeedFilter
 
     set :logging, :true
     set :root, BASE
-    set :public, "#{BASE}/static"
+    set :public, "public"
     require BASE + "/views/layout"
 
     set :mustache, {
@@ -38,8 +38,9 @@ class GithubFeedFilter
       end
 
       def authorized?
-        @auth ||=  Rack::Auth::Basic::Request.new(request.env)
-        @auth.provided? && @auth.basic? && @auth.credentials && @auth.credentials == ['admin', 'admin']
+        cookie = request.cookies["github_token"]
+        # TODO: check for credentials
+        true
       end
 
     end
@@ -57,16 +58,27 @@ class GithubFeedFilter
       mustache :settings
     end
 
+    post '/settings/?' do
+      protected!
+      # TODO: save settings to redis
+      redirect '/'
+    end
+
     get '/sign_in/?' do
       mustache :signin
     end
 
+    post '/sign_in/?' do
+      # TODO: get watched repositories and merge with set in redis
+      redirect '/'
+    end
+
 
     # css
-    get '/css/style.css' do
-      content_type 'text/css', :charset => 'utf-8'
-      sass :stylesheet
-    end
+    #get '/css/style.css' do
+      #content_type 'text/css', :charset => 'utf-8'
+      #sass :stylesheet
+    #end
 
   end
 end
