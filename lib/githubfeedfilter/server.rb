@@ -59,6 +59,9 @@ class GithubFeedFilter
 
     get '/settings/?' do
       protected!
+      cookie = request.cookies["github_token"].split(":")
+      res = github_get_watched(cookie[0], cookie[1])
+      @repos = Yajl::Parser.new().parse(res.body)["repositories"]
       mustache :settings
     end
 
@@ -81,6 +84,14 @@ class GithubFeedFilter
 
     def github_authenticate(user, token)
       req = Net::HTTP::Get.new('https://github.com/api/v2/json/user/show')
+      req.basic_auth(user+"/token", token)
+      http = Net::HTTP.new("github.com", 443)
+      http.use_ssl = true
+      res = http.request(req)
+    end
+
+    def github_get_watched(user, token)
+      req = Net::HTTP::Get.new("https://github.com/api/v2/json/repos/watched/#{user}")
       req.basic_auth(user+"/token", token)
       http = Net::HTTP.new("github.com", 443)
       http.use_ssl = true
