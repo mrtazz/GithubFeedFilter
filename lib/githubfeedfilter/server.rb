@@ -7,7 +7,7 @@ end
 require 'sinatra/base'
 require 'mustache/sinatra'
 require 'yajl'
-require 'net/http'
+require 'net/https'
 require 'uri'
 
 class GithubFeedFilter
@@ -38,9 +38,13 @@ class GithubFeedFilter
       end
 
       def authorized?
-        cookie = request.cookies["github_token"]
-        # TODO: check for credentials
-        true
+        cookie = request.cookies["github_token"].split(":")
+        res = github_authenticate(cookie[0], cookie[1])
+        if res.code.to_i == 200
+          return true
+        else
+          return false
+        end
       end
 
     end
@@ -73,12 +77,28 @@ class GithubFeedFilter
       redirect '/'
     end
 
+    private
 
-    # css
-    #get '/css/style.css' do
-      #content_type 'text/css', :charset => 'utf-8'
-      #sass :stylesheet
-    #end
+    def github_authenticate(user, token)
+      req = Net::HTTP::Get.new('https://github.com/api/v2/json/user/show')
+      req.basic_auth(user+"/token", token)
+      http = Net::HTTP.new("github.com", 443)
+      http.use_ssl = true
+      res = http.request(req)
+    end
+
+    def github_get_feed(user, token)
+      url = "https://github.com/#{user}.private.json?token=#{token}"
+      req = Net::HTTP::Get.new(url)
+      req.basic_auth(user, token)
+      http = Net::HTTP.new("github.com", 80)
+      http.use_ssl = true
+      res = http.request(req)
+    end
+
+    def handle_error(req, res)
+      return false
+    end
 
   end
 end
