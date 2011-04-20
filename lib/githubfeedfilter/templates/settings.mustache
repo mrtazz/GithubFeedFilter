@@ -1,8 +1,78 @@
 <h2> Repositories to filter </h2>
 <div id="repos">
+
+<form id="settingsform">
+ <p>
+  <span class="reponame">General</span>
+  <label>
+    <input name="all"
+           class="check"
+           type=checkbox
+           {{#all}}checked{{/all}}>
+    All
+  </label>
+  <label>
+    <input name="follow"
+           class="check"
+           type=checkbox
+           {{#follow}}checked{{/follow}}>
+    Follows
+  </label>
+ </p>
 {{#repos}}
-<ul>
-<li> {{name}} </li>
-</ul>
+ <p>
+  <span class="reponame">{{name}}</span>
+  <label>
+    <input name="all"
+           class="check"
+           type=checkbox
+           {{#all}}checked{{/all}}>
+    All
+  </label>
+  <label>
+    <input name="push"
+           class="check"
+           type=checkbox
+           {{#push}}checked{{/push}}>
+    Pushes
+  </label>
+  <label>
+    <input name="issues"
+           class="check"
+           type=checkbox
+           {{#issues}}checked{{/issues}}>
+    Issues
+  </label>
+  <label>
+    <input name="tags"
+           class="check"
+           type=checkbox
+           {{#tags}}checked{{/tags}}>
+    Tags
+  </label>
+  <label>
+    <input name="comments"
+           class="check"
+           type=checkbox
+           {{#comments}}checked{{/comments}}>
+    Comments
+  </label>
+  <label>
+    <input name="pull"
+           class="check"
+           type=checkbox
+           {{#pulls}}checked{{/pulls}}>
+    Pull Requests
+  </label>
+  <label>
+    <input name="wiki"
+           class="check"
+           type=checkbox
+           {{#wiki}}checked{{/wiki}}>
+    Wiki
+  </label>
+</p>
 {{/repos}}
+</form>
+
 </div>

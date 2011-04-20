@@ -9,6 +9,18 @@ require 'mustache/sinatra'
 require 'yajl'
 require 'net/https'
 require 'uri'
+require "redis"
+
+# arrays for event categories
+ALL       = ["all"]
+PUSH      = ["PushEvent"]
+ISSUES    = ["IssuesEvent"]
+TAGS      = ["?TagEvent"]
+COMMENTS  = ["IssueCommentEvent"]
+PULLS     = ["PullRequestEvent"]
+WIKI      = ["GollumEvent"]
+FOLLOW    = ["FollowEvent"]
+
 
 class GithubFeedFilter
 
@@ -27,6 +39,11 @@ class GithubFeedFilter
       :templates => "#{BASE}/templates/",
       :namespace => GithubFeedFilter
     }
+
+    def initialize(redis_host = "127.0.0.1", redis_port = 6380, *args)
+      super *args
+      @redis = Redis.new(:host => redis_host, :port => redis_port)
+    end
 
     # http basic auth helpers
     helpers do
@@ -61,7 +78,32 @@ class GithubFeedFilter
       protected!
       cookie = request.cookies["github_token"].split(":")
       res = github_get_watched(cookie[0], cookie[1])
-      @repos = Yajl::Parser.new().parse(res.body)["repositories"]
+      @repos = []
+      full_repos = Yajl::Parser.new().parse(res.body)["repositories"]
+      # TODO: check repos with settings in redis
+      full_repos.foreach do |r|
+        rep = {:name => r.name}
+        if @redis.exists("#{cookie[0]}/#{r.name}")
+          r_settings = @redis.smembers "#{cookie[0]}/#{r.name}"
+          if (r_settings & ALL).length > 0
+              rep[:all] = true
+          else if (r_settings & PUSH).length > 0
+              rep[:push] = true
+          else if (r_settings & ISSUES).length > 0
+              rep[:issues] = true
+          else if (r_settings & TAGS).length > 0
+              rep[:tags] = true
+          else if (r_settings & COMMENTS).length > 0
+              rep[:comments] = true
+          else if (r_settings & PULLS).length > 0
+              rep[:pulls] = true
+          else if (r_settings & WIKI).length > 0
+              rep[:wiki] = true
+          end
+        end
+        @repos << rep
+      end
+      @repos.sort! { |a,b| a[:name].downcase <=> b[:name].downcase }
       mustache :settings
     end
 
@@ -102,13 +144,9 @@ class GithubFeedFilter
       url = "https://github.com/#{user}.private.json?token=#{token}"
       req = Net::HTTP::Get.new(url)
       req.basic_auth(user, token)
-      http = Net::HTTP.new("github.com", 80)
+      http = Net::HTTP.new("github.com", 443)
       http.use_ssl = true
       res = http.request(req)
-    end
-
-    def handle_error(req, res)
-      return false
     end
 
   end
