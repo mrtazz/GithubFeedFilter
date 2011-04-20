@@ -1,7 +1,7 @@
-require "lib/ramrod/server"
+require "lib/githubfeedfilter/server"
 
-class Ramrod
+class GithubFeedFilter
   def self.app
-    Ramrod::Server
+    GithubFeedFilter::Server
   end
 end
