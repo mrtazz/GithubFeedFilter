@@ -15,11 +15,12 @@ require 'redis'
 ALL       = ["all"]
 PUSH      = ["PushEvent", "DeleteEvent", "CreateEvent"]
 ISSUES    = ["IssuesEvent"]
-TAGS      = ["?TagEvent"]
-COMMENTS  = ["IssueCommentEvent"]
+TAGS      = ["TagEvent"]
+COMMENTS  = ["IssueCommentEvent", "CommitCommentEvent"]
 PULLS     = ["PullRequestEvent"]
 WIKI      = ["GollumEvent"]
 FOLLOW    = ["FollowEvent"]
+WATCH     = ["WatchEvent"]
 
 
 class GithubFeedFilter
@@ -96,8 +97,10 @@ class GithubFeedFilter
       full_repos.each do |r|
         rep = {:name => r["name"]}
         rep[:owner] = r["owner"]
-        if @redis.exists("#{cookie[0]}/#{r["name"]}")
-          r_settings = @redis.smembers "#{cookie[0]}/#{r["name"]}"
+        if @redis.exists("#{cookie[0]}/#{r["owner"]}/#{r["name"]}")
+          puts "repo exists"
+          r_settings = @redis.smembers "#{cookie[0]}/#{r["owner"]}/#{r["name"]}"
+          puts r_settings
           if (r_settings & ALL).length > 0
               rep[:all] = true
           elsif (r_settings & PUSH).length > 0
@@ -113,6 +116,7 @@ class GithubFeedFilter
           elsif (r_settings & WIKI).length > 0
               rep[:wiki] = true
           end
+          puts rep
         end
         @repos << rep
       end
@@ -124,6 +128,39 @@ class GithubFeedFilter
     put '/settings/?' do
       protected!
       # TODO: save settings to redis
+      cookie = request.cookies["github_token"].split(":")
+      events = []
+      case params["event"]
+        when "all"
+          events = ALL
+        when "follow"
+          events = FOLLOW
+        when "watch"
+          events = WATCH
+        when "push"
+          events = PUSH
+        when "issues"
+          events = ISSUES
+        when "tags"
+          events = TAGS
+        when "comments"
+          events = COMMENTS
+        when "pull"
+          events = PULLS
+        when "wiki"
+          events = WIKI
+        else
+          events = []
+      end
+      if params["checked"].eql? "true"
+        events.each do |e|
+          @redis.sadd("#{cookie[0]}/#{params["repo"]}", e)
+        end
+      else
+        events.each do |e|
+          @redis.srem("#{cookie[0]}/#{params["repo"]}", e)
+        end
+      end
       redirect '/'
     end
 
