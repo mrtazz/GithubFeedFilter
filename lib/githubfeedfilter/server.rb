@@ -9,11 +9,11 @@ require 'mustache/sinatra'
 require 'yajl'
 require 'net/https'
 require 'uri'
-require "redis"
+require 'redis'
 
 # arrays for event categories
 ALL       = ["all"]
-PUSH      = ["PushEvent"]
+PUSH      = ["PushEvent", "DeleteEvent", "CreateEvent"]
 ISSUES    = ["IssuesEvent"]
 TAGS      = ["?TagEvent"]
 COMMENTS  = ["IssueCommentEvent"]
@@ -40,11 +40,6 @@ class GithubFeedFilter
       :namespace => GithubFeedFilter
     }
 
-    def initialize(redis_host = "127.0.0.1", redis_port = 6380, *args)
-      super *args
-      @redis = Redis.new(:host => redis_host, :port => redis_port)
-    end
-
     # http basic auth helpers
     helpers do
 
@@ -55,25 +50,42 @@ class GithubFeedFilter
       end
 
       def authorized?
-        cookie = request.cookies["github_token"].split(":")
-        res = github_authenticate(cookie[0], cookie[1])
-        if res.code.to_i == 200
-          return true
-        else
-          return false
+        false
+        unless request.cookies["github_token"].nil?
+          cookie = request.cookies["github_token"].split(":")
+          res = github_authenticate(cookie[0], cookie[1])
+          if res.code.to_i == 200
+            return true
+          else
+            return false
+          end
         end
       end
 
     end
 
+    def initialize(redis_host = "127.0.0.1", redis_port = 6379, *args)
+      super *args
+      @redis = Redis.new(:host => redis_host, :port => redis_port)
+    end
 
     # index page
     get '/' do
       protected!
+      cookie = request.cookies["github_token"].split(":")
+      res = github_get_feed(cookie[0], cookie[1])
+      feed = Yajl::Parser.new().parse(res.body)
       @items = []
+      feed.each do |event|
+        repo = event["repository"]["name"]
+        if @redis.sismember("#{cookie[0]}/#{repo}", event["type"])
+          @items << event
+        end
+      end
       mustache :index
     end
 
+    # show settings page to the user
     get '/settings/?' do
       protected!
       cookie = request.cookies["github_token"].split(":")
@@ -81,23 +93,24 @@ class GithubFeedFilter
       @repos = []
       full_repos = Yajl::Parser.new().parse(res.body)["repositories"]
       # TODO: check repos with settings in redis
-      full_repos.foreach do |r|
-        rep = {:name => r.name}
-        if @redis.exists("#{cookie[0]}/#{r.name}")
-          r_settings = @redis.smembers "#{cookie[0]}/#{r.name}"
+      full_repos.each do |r|
+        rep = {:name => r["name"]}
+        rep[:owner] = r["owner"]
+        if @redis.exists("#{cookie[0]}/#{r["name"]}")
+          r_settings = @redis.smembers "#{cookie[0]}/#{r["name"]}"
           if (r_settings & ALL).length > 0
               rep[:all] = true
-          else if (r_settings & PUSH).length > 0
+          elsif (r_settings & PUSH).length > 0
               rep[:push] = true
-          else if (r_settings & ISSUES).length > 0
+          elsif (r_settings & ISSUES).length > 0
               rep[:issues] = true
-          else if (r_settings & TAGS).length > 0
+          elsif (r_settings & TAGS).length > 0
               rep[:tags] = true
-          else if (r_settings & COMMENTS).length > 0
+          elsif (r_settings & COMMENTS).length > 0
               rep[:comments] = true
-          else if (r_settings & PULLS).length > 0
+          elsif (r_settings & PULLS).length > 0
               rep[:pulls] = true
-          else if (r_settings & WIKI).length > 0
+          elsif (r_settings & WIKI).length > 0
               rep[:wiki] = true
           end
         end
@@ -107,17 +120,20 @@ class GithubFeedFilter
       mustache :settings
     end
 
-    post '/settings/?' do
+    # url to update single settings on check
+    put '/settings/?' do
       protected!
       # TODO: save settings to redis
       redirect '/'
     end
 
+    # get sign in page
     get '/sign_in/?' do
       mustache :signin
     end
 
     post '/sign_in/?' do
+      # TODO: check github auth
       # TODO: get watched repositories and merge with set in redis
       redirect '/'
     end
@@ -151,3 +167,4 @@ class GithubFeedFilter
 
   end
 end
+
