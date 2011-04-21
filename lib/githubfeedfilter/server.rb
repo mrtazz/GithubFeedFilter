@@ -127,7 +127,7 @@ class GithubFeedFilter
     # url to update single settings on check
     put '/settings/?' do
       protected!
-      # TODO: save settings to redis
+      # save settings to redis
       cookie = request.cookies["github_token"].split(":")
       events = []
       case params["event"]
@@ -170,9 +170,9 @@ class GithubFeedFilter
     end
 
     post '/sign_in/?' do
-      # TODO: check github auth
-      # TODO: get watched repositories and merge with set in redis
-      redirect '/'
+      # return result code of github auth
+      res = github_authenticate(params["name"], params["password"])
+      return res.code.to_i
     end
 
     private
