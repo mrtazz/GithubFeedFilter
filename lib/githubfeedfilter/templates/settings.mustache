@@ -18,10 +18,17 @@
            {{#follow}}checked{{/follow}}>
     Follows
   </label>
+  <label>
+    <input name="watch"
+           class="check"
+           type=checkbox
+           {{#watch}}checked{{/watch}}>
+    Watches
+  </label>
  </p>
 {{#repos}}
  <p>
-  <span class="reponame">{{name}}</span>
+  <span class="reponame">{{owner}}/{{name}}</span>
   <label>
     <input name="all"
            class="check"
