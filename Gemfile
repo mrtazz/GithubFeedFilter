@@ -3,7 +3,7 @@ source "http://rubygems.org"
 gem "sinatra"
 gem "mustache"
 gem "yajl-ruby"
-gem "rest-client"
+gem "redis"
 
 
 group :development do
