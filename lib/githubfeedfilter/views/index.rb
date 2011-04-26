@@ -5,7 +5,7 @@ class GithubFeedFilter
       def items
         ret = []
         now = DateTime.now
-        @bla.each do |i|
+        @events.each do |i|
           ev = {}
           ev[:url] = i["url"]
           ev[:repourl] = i["repository"]["url"]
