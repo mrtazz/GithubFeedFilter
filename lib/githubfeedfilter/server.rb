@@ -15,12 +15,15 @@ require 'redis'
 ALL       = ["all"]
 PUSH      = ["PushEvent", "DeleteEvent", "CreateEvent"]
 ISSUES    = ["IssuesEvent"]
-TAGS      = ["TagEvent"]
+TAGS      = ["CreateEvent"]
 COMMENTS  = ["IssueCommentEvent", "CommitCommentEvent"]
 PULLS     = ["PullRequestEvent"]
 WIKI      = ["GollumEvent"]
 FOLLOW    = ["FollowEvent"]
 WATCH     = ["WatchEvent"]
+FORK      = ["ForkApplyEvent"]
+GIST      = ["GistEvent"]
+USERBASED = FOLLOW + WATCH + GIST + ["ForkEvent"] # we show all actions related to users ATM
 
 
 class GithubFeedFilter
@@ -44,12 +47,14 @@ class GithubFeedFilter
     # http basic auth helpers
     helpers do
 
+      # unauthorized users should sign in
       def protected!
         unless authorized?
           redirect '/sign_in'
         end
       end
 
+      # check via github auth if authorized
       def authorized?
         false
         unless request.cookies["github_token"].nil?
@@ -70,17 +75,20 @@ class GithubFeedFilter
       @redis = Redis.new(:host => redis_host, :port => redis_port)
     end
 
-    # index page
+    # index page, event feed is parsed and filtered here
     get '/' do
       protected!
       cookie = request.cookies["github_token"].split(":")
       res = github_get_feed(cookie[0], cookie[1])
       feed = Yajl::Parser.new().parse(res.body)
-      @items = []
+      @events = []
       feed.each do |event|
         repo = event["repository"]["name"]
-        if @redis.sismember("#{cookie[0]}/#{repo}", event["type"])
-          @items << event
+        owner = event["repository"]["owner"]
+        if (@redis.sismember("#{cookie[0]}/#{owner}/#{repo}", event["type"]) ||
+            @redis.sismember("#{cookie[0]}/#{owner}/#{repo}", "all") ||
+            ([event["type"]] & USERBASED).length > 0)
+          @events << event
         end
       end
       mustache :index
@@ -93,7 +101,7 @@ class GithubFeedFilter
       res = github_get_watched(cookie[0], cookie[1])
       @repos = []
       full_repos = Yajl::Parser.new().parse(res.body)["repositories"]
-      # TODO: check repos with settings in redis
+      # check repos with settings in redis
       full_repos.each do |r|
         rep = {:name => r["name"]}
         rep[:owner] = r["owner"]
@@ -115,6 +123,8 @@ class GithubFeedFilter
               rep[:pulls] = true
           elsif (r_settings & WIKI).length > 0
               rep[:wiki] = true
+          elsif (r_settings & FORK).length > 0
+              rep[:fork] = true
           end
           puts rep
         end
@@ -149,6 +159,8 @@ class GithubFeedFilter
           events = PULLS
         when "wiki"
           events = WIKI
+        when "fork"
+          events = FORK
         else
           events = []
       end
@@ -177,6 +189,7 @@ class GithubFeedFilter
 
     private
 
+    # authenticate user with token against github
     def github_authenticate(user, token)
       req = Net::HTTP::Get.new('https://github.com/api/v2/json/user/show')
       req.basic_auth(user+"/token", token)
@@ -185,6 +198,7 @@ class GithubFeedFilter
       res = http.request(req)
     end
 
+    # get all watched repositories for a user
     def github_get_watched(user, token)
       req = Net::HTTP::Get.new("https://github.com/api/v2/json/repos/watched/#{user}")
       req.basic_auth(user+"/token", token)
@@ -193,6 +207,7 @@ class GithubFeedFilter
       res = http.request(req)
     end
 
+    # get the feed for a user
     def github_get_feed(user, token)
       url = "https://github.com/#{user}.private.json?token=#{token}"
       req = Net::HTTP::Get.new(url)
