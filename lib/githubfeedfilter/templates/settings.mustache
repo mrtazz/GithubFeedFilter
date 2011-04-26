@@ -1,31 +1,4 @@
-<h2> Repositories to filter </h2>
-<div id="repos">
-
-<form id="settingsform">
- <p>
-  <span class="reponame">General</span>
-  <label>
-    <input name="all"
-           class="check"
-           type=checkbox
-           {{#all}}checked{{/all}}>
-    All
-  </label>
-  <label>
-    <input name="follow"
-           class="check"
-           type=checkbox
-           {{#follow}}checked{{/follow}}>
-    Follows
-  </label>
-  <label>
-    <input name="watch"
-           class="check"
-           type=checkbox
-           {{#watch}}checked{{/watch}}>
-    Watches
-  </label>
- </p>
+<form id="repos">
 {{#repos}}
  <p>
   <span class="reponame">{{owner}}/{{name}}</span>
@@ -78,8 +51,13 @@
            {{#wiki}}checked{{/wiki}}>
     Wiki
   </label>
+  <label>
+    <input name="fork"
+           class="check"
+           type=checkbox
+           {{#fork}}checked{{/fork}}>
+    Forks
+  </label>
 </p>
 {{/repos}}
 </form>
-
-</div>

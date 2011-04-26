@@ -1,8 +1,36 @@
-<h2> News Feed </h2>
 <div id="feeditems">
-{{#items}}
 <ul>
-<li> {{name}}</li>
-</ul>
+{{#items}}
+
+<li>
+  <span class="time">{{time}} {{timeunit}} ago: </span>
+  <a href="https://github.com/{{actor}}">{{actor}}</a>
+
+{{#PullRequestEvent}}
+  <a href="{{url}}">{{action}}</a> Pull Request {{number}} at
+{{/PullRequestEvent}}
+{{#IssuesEvent}}
+  {{action}} <a href="{{url}}"> issue {{number}}</a> at
+{{/IssuesEvent}}
+{{#IssueCommentEvent}} commented on an issue at {{/IssueCommentEvent}}
+{{#CommitCommentEvent}} commented on commit {{number}} at {{/CommitCommentEvent}}
+{{#BranchEvent}}
+  {{#CreateEvent}} created branch {{object}} at {{/CreateEvent}}
+  {{#DeleteEvent}} deleted branch {{object}} at {{/DeleteEvent}}
+{{/BranchEvent}}
+{{#TagEvent}}
+  {{#CreateEvent}} created tag {{object}} at {{/CreateEvent}}
+  {{#DeleteEvent}} deleted tag {{object}} at {{/DeleteEvent}}
+{{/TagEvent}}
+{{#FollowEvent}} started following {{followee}} {{/FollowEvent}}
+{{#ForkApplyEvent}} applied fork commits at {{/ForkApplyEvent}}
+{{#PushEvent}} <a href="{{url}}">pushed</a> to {{/PushEvent}}
+{{#ForkEvent}} forked {{/ForkEvent}}
+
+{{^FollowEvent}}
+  <a href="{{repourl}}">{{repo}}</a>
+{{/FollowEvent}}
+</li>
 {{/items}}
+</ul>
 </div>
