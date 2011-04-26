@@ -1,0 +1,64 @@
+#headline
+{
+  width: 500px;
+  margin: 0 auto;
+  margin-top: 40px;
+}
+
+h1,h2,h3
+{
+  display: inline;
+}
+
+h1
+{
+  margin-right: 20px;
+}
+
+a:visited
+{
+  color:blue;
+}
+
+/* index */
+#feeditems
+{
+  margin: 0 auto;
+  margin-top: 40px;
+  width: 700px;
+}
+#feeditems span.time
+{
+  float: left;
+  width: 120px;
+  text-align: right;
+  padding-right: 20px;
+}
+
+#feeditems ul
+{
+  list-style-type: none;
+  padding: 0px;
+}
+
+#feeditems li
+{
+  margin-bottom: 15px;
+  padding-left: 15px;
+}
+
+
+/* settings */
+#repos
+{
+  margin: 0 auto;
+  margin-top: 40px;
+  width: 900px;
+}
+#repos span.reponame
+{
+  float: left;
+  width: 300px;
+  text-align: right;
+  padding-right: 20px;
+}
