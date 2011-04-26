@@ -72,7 +72,8 @@ class GithubFeedFilter
 
     def initialize(redis_host = "127.0.0.1", redis_port = 6379, *args)
       super *args
-      @redis = Redis.new(:host => redis_host, :port => redis_port)
+      uri = URI.parse(ENV["REDISTOGO_URL"])
+      @redis = Redis.new(:host => uri.host, :port => uri.port, :password => uri.password)
     end
 
     # index page, event feed is parsed and filtered here
