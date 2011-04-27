@@ -13,7 +13,9 @@
   {{action}} <a href="{{url}}"> issue {{number}}</a> at
 {{/IssuesEvent}}
 {{#IssueCommentEvent}} commented on an issue at {{/IssueCommentEvent}}
-{{#CommitCommentEvent}} commented on commit {{number}} at {{/CommitCommentEvent}}
+{{#CommitCommentEvent}}
+  <a href="{{url}}">commented</a> on a commit at
+{{/CommitCommentEvent}}
 {{#BranchEvent}}
   {{#CreateEvent}}
     created branch <a href="{{url}}">{{object}}</a> at
