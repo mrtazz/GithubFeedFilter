@@ -22,7 +22,7 @@ class GithubFeedFilter
           ev[:action] = i["payload"]["action"] || ""
           ev[:number] = i["payload"]["number"] || ""
           ev[:repo] = i["payload"]["repo"] || i["repository"]["name"]
-          ev[:object] = i["payload"]["object"] || ""
+          ev[:object] = i["payload"]["object_name"] || ""
           begin
             ev[:followee] = i["payload"]["target"]["login"]
           rescue NoMethodError
