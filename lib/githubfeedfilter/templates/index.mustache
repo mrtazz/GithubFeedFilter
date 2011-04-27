@@ -15,12 +15,20 @@
 {{#IssueCommentEvent}} commented on an issue at {{/IssueCommentEvent}}
 {{#CommitCommentEvent}} commented on commit {{number}} at {{/CommitCommentEvent}}
 {{#BranchEvent}}
-  {{#CreateEvent}} created branch {{object}} at {{/CreateEvent}}
-  {{#DeleteEvent}} deleted branch {{object}} at {{/DeleteEvent}}
+  {{#CreateEvent}}
+    created branch <a href="{{url}}">{{object}}</a> at
+{{/CreateEvent}}
+  {{#DeleteEvent}}
+    deleted branch <a href="{{url}}">{{object}}</a> at
+  {{/DeleteEvent}}
 {{/BranchEvent}}
 {{#TagEvent}}
-  {{#CreateEvent}} created tag {{object}} at {{/CreateEvent}}
-  {{#DeleteEvent}} deleted tag {{object}} at {{/DeleteEvent}}
+  {{#CreateEvent}}
+    created tag <a href="{{url}}">{{object}}</a> at
+  {{/CreateEvent}}
+  {{#DeleteEvent}}
+    deleted tag <a href="{{url}}">{{object}}</a> at
+  {{/DeleteEvent}}
 {{/TagEvent}}
 {{#FollowEvent}} started following {{followee}} {{/FollowEvent}}
 {{#ForkApplyEvent}} applied fork commits at {{/ForkApplyEvent}}
@@ -29,7 +37,7 @@
 {{#WatchEvent}} started watching {{/WatchEvent}}
 
 {{^FollowEvent}}
-  <a href="{{repourl}}">{{repo}}</a>
+  <a href="{{repourl}}"> {{repo}}</a>
 {{/FollowEvent}}
 </li>
 {{/items}}
