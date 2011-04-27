@@ -32,7 +32,7 @@ class GithubFeedFilter
           if i["payload"]["object"].eql? "branch"
             ev["BranchEvent"] = true
           elsif i["payload"]["object"].eql? "tag"
-            ev[i["TagEvent"]] = true
+            ev["TagEvent"] = true
           end
           ev[i["type"]] = true
 
