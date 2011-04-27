@@ -107,9 +107,7 @@ class GithubFeedFilter
         rep = {:name => r["name"]}
         rep[:owner] = r["owner"]
         if @redis.exists("#{cookie[0]}/#{r["owner"]}/#{r["name"]}")
-          puts "repo exists"
           r_settings = @redis.smembers "#{cookie[0]}/#{r["owner"]}/#{r["name"]}"
-          puts r_settings
           if (r_settings & ALL).length > 0
               rep[:all] = true
           elsif (r_settings & PUSH).length > 0
@@ -127,7 +125,6 @@ class GithubFeedFilter
           elsif (r_settings & FORK).length > 0
               rep[:fork] = true
           end
-          puts rep
         end
         @repos << rep
       end
