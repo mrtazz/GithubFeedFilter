@@ -19,11 +19,11 @@
 {{#BranchEvent}}
   {{#CreateEvent}}
     created branch <a href="{{url}}">{{object}}</a> at
-{{/CreateEvent}}
-  {{#DeleteEvent}}
-    deleted branch <a href="{{url}}">{{object}}</a> at
-  {{/DeleteEvent}}
+  {{/CreateEvent}}
 {{/BranchEvent}}
+{{#DeleteEvent}}
+  deleted branch <a href="{{url}}">{{object}}</a> at
+{{/DeleteEvent}}
 {{#TagEvent}}
   {{#CreateEvent}}
     created tag <a href="{{url}}">{{object}}</a> at
