@@ -23,7 +23,7 @@ FOLLOW    = ["FollowEvent"]
 WATCH     = ["WatchEvent"]
 FORK      = ["ForkApplyEvent"]
 GIST      = ["GistEvent"]
-USERBASED = FOLLOW + WATCH + GIST + ["ForkEvent"] # we show all actions related to users ATM
+USERBASED = FOLLOW + WATCH + GIST + ["ForkEvent", "PublicEvent"] # we show all actions related to users ATM
 
 
 class GithubFeedFilter
