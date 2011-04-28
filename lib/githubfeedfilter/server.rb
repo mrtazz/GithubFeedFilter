@@ -83,13 +83,18 @@ class GithubFeedFilter
       res = github_get_feed(cookie[0], cookie[1])
       feed = Yajl::Parser.new().parse(res.body)
       @events = []
-      feed.each do |event|
-        repo = event["repository"]["name"]
-        owner = event["repository"]["owner"]
-        if (@redis.sismember("#{cookie[0]}/#{owner}/#{repo}", event["type"]) ||
-            @redis.sismember("#{cookie[0]}/#{owner}/#{repo}", "all") ||
-            ([event["type"]] & USERBASED).length > 0)
-          @events << event
+      unless feed.nil?
+        feed.each do |event|
+          repo = event["repository"]
+          unless repo.nil?
+            name = repo["name"]
+            owner = repo["owner"]
+            if (@redis.sismember("#{cookie[0]}/#{owner}/#{name}", event["type"]) ||
+                @redis.sismember("#{cookie[0]}/#{owner}/#{name}", "all") ||
+                ([event["type"]] & USERBASED).length > 0)
+              @events << event
+            end
+          end
         end
       end
       mustache :index
