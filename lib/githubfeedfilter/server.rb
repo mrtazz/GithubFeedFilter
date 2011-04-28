@@ -72,7 +72,7 @@ class GithubFeedFilter
 
     def initialize(redis_host = "127.0.0.1", redis_port = 6379, *args)
       super *args
-      uri = URI.parse(ENV["REDISTOGO_URL"])
+      uri = URI.parse(ENV["REDISTOGO_URL"] || "redis://127.0.0.1:6379")
       @redis = Redis.new(:host => uri.host, :port => uri.port, :password => uri.password)
     end
 
