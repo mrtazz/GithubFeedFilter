@@ -21,6 +21,10 @@ intend to change this as soon as possible. In the meanwhile you either have to
 trust that the same version of the application shown here is running on heroku
 or run your own.
 
+## Development
+- [Stories](https://www.pivotaltracker.com/projects/271107)
+- [Issues](https://github.com/mrtazz/GithubFeedFilter/issues)
+
 ## Contribute
 Just fork and contribute, there are no tests at the moment, so you have to make
 sure yourself you don't break it. Bonus points for topic branches (and creating
