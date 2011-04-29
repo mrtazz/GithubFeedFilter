@@ -21,6 +21,11 @@ $(document).ready(function(){
 
     });
 
+    $("#logout").click(function()
+        {
+          document.cookie = "github_token=; expires="+(new Date(-1).toUTCString())+"; path=/";
+        });
+
     $('.check').change(function() {
 
       var repo = $(this).parents("p").children("span.reponame").html();
