@@ -22,7 +22,7 @@ class GithubFeedFilter
           ev[:action] = i["payload"]["action"] || ""
           ev[:number] = i["payload"]["number"] || ""
           ev[:repo] = i["payload"]["repo"] || i["repository"]["name"]
-          ev[:object] = i["payload"]["object"] || ""
+          ev[:object] = i["payload"]["object_name"] || i["payload"]["ref"] || ""
           begin
             ev[:followee] = i["payload"]["target"]["login"]
           rescue NoMethodError
@@ -32,7 +32,7 @@ class GithubFeedFilter
           if i["payload"]["object"].eql? "branch"
             ev["BranchEvent"] = true
           elsif i["payload"]["object"].eql? "tag"
-            ev[i["TagEvent"]] = true
+            ev["TagEvent"] = true
           end
           ev[i["type"]] = true
 

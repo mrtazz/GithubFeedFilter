@@ -23,7 +23,7 @@ FOLLOW    = ["FollowEvent"]
 WATCH     = ["WatchEvent"]
 FORK      = ["ForkApplyEvent"]
 GIST      = ["GistEvent"]
-USERBASED = FOLLOW + WATCH + GIST + ["ForkEvent"] # we show all actions related to users ATM
+USERBASED = FOLLOW + WATCH + GIST + ["ForkEvent", "PublicEvent"] # we show all actions related to users ATM
 
 
 class GithubFeedFilter
@@ -72,7 +72,7 @@ class GithubFeedFilter
 
     def initialize(redis_host = "127.0.0.1", redis_port = 6379, *args)
       super *args
-      uri = URI.parse(ENV["REDISTOGO_URL"])
+      uri = URI.parse(ENV["REDISTOGO_URL"] || "redis://127.0.0.1:6379")
       @redis = Redis.new(:host => uri.host, :port => uri.port, :password => uri.password)
     end
 
@@ -83,13 +83,18 @@ class GithubFeedFilter
       res = github_get_feed(cookie[0], cookie[1])
       feed = Yajl::Parser.new().parse(res.body)
       @events = []
-      feed.each do |event|
-        repo = event["repository"]["name"]
-        owner = event["repository"]["owner"]
-        if (@redis.sismember("#{cookie[0]}/#{owner}/#{repo}", event["type"]) ||
-            @redis.sismember("#{cookie[0]}/#{owner}/#{repo}", "all") ||
-            ([event["type"]] & USERBASED).length > 0)
-          @events << event
+      unless feed.nil?
+        feed.each do |event|
+          repo = event["repository"]
+          unless repo.nil?
+            name = repo["name"]
+            owner = repo["owner"]
+            if (@redis.sismember("#{cookie[0]}/#{owner}/#{name}", event["type"]) ||
+                @redis.sismember("#{cookie[0]}/#{owner}/#{name}", "all") ||
+                ([event["type"]] & USERBASED).length > 0)
+              @events << event
+            end
+          end
         end
       end
       mustache :index
@@ -107,9 +112,7 @@ class GithubFeedFilter
         rep = {:name => r["name"]}
         rep[:owner] = r["owner"]
         if @redis.exists("#{cookie[0]}/#{r["owner"]}/#{r["name"]}")
-          puts "repo exists"
           r_settings = @redis.smembers "#{cookie[0]}/#{r["owner"]}/#{r["name"]}"
-          puts r_settings
           if (r_settings & ALL).length > 0
               rep[:all] = true
           elsif (r_settings & PUSH).length > 0
@@ -127,7 +130,6 @@ class GithubFeedFilter
           elsif (r_settings & FORK).length > 0
               rep[:fork] = true
           end
-          puts rep
         end
         @repos << rep
       end

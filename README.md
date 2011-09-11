@@ -1,4 +1,4 @@
-# Github Feed Filter
+# GFF - Github Feed Filter
 
 ## Motivation
 This is a simple web application based on sinatra and redis to show a filtered
