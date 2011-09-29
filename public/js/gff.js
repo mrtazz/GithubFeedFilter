@@ -28,7 +28,7 @@ $(document).ready(function(){
 
     $('.check').change(function() {
 
-      var repo = $(this).parents("p").children("span.reponame").html();
+      var repo = $(this).parents("p").children("span.reponame").children("a").html();
       var e = $(this).attr("name");
       var checked = $(this).is(":checked");
 

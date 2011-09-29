@@ -1,7 +1,9 @@
 <form id="repos">
 {{#repos}}
  <p>
-  <span class="reponame">{{owner}}/{{name}}</span>
+ <span class="reponame">
+   <a href="https://github.com/{{owner}}/{{name}}">{{owner}}/{{name}}</a>
+ </span>
   <label>
     <input name="all"
            class="check"

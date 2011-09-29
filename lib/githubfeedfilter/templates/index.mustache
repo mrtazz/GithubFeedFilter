@@ -4,43 +4,45 @@
 
 <li>
   <span class="time">{{time}} {{timeunit}} ago: </span>
-  <a href="https://github.com/{{actor}}">{{actor}}</a>
+  <a href="https://github.com/{{actor}}" target="_blank">{{actor}}</a>
 
 {{#PullRequestEvent}}
-  <a href="{{url}}">{{action}}</a> Pull Request {{number}} at
+  <a href="{{url}}" target="_blank">{{action}}</a> Pull Request {{number}} at
 {{/PullRequestEvent}}
 {{#IssuesEvent}}
-  {{action}} <a href="{{url}}"> issue {{number}}</a> at
+  {{action}} <a href="{{url}}" target="_blank"> issue {{number}}</a> at
 {{/IssuesEvent}}
 {{#IssueCommentEvent}} commented on an issue at {{/IssueCommentEvent}}
 {{#CommitCommentEvent}}
-  <a href="{{url}}">commented</a> on a commit at
+  <a href="{{url}}" target="_blank">commented</a> on a commit at
 {{/CommitCommentEvent}}
 {{#BranchEvent}}
   {{#CreateEvent}}
-    created branch <a href="{{url}}">{{object}}</a> at
+    created branch <a href="{{url}}" target="_blank">{{object}}</a> at
   {{/CreateEvent}}
 {{/BranchEvent}}
-{{#DeleteEvent}}
-  deleted branch <a href="{{url}}">{{object}}</a> at
-{{/DeleteEvent}}
+{{#BranchEvent}}
+  {{#DeleteEvent}}
+    deleted branch <a href="{{url}}" target="_blank">{{object}}</a> at
+  {{/DeleteEvent}}
+{{/BranchEvent}}
 {{#TagEvent}}
   {{#CreateEvent}}
-    created tag <a href="{{url}}">{{object}}</a> at
+    created tag <a href="{{url}}" target="_blank">{{object}}</a> at
   {{/CreateEvent}}
   {{#DeleteEvent}}
-    deleted tag <a href="{{url}}">{{object}}</a> at
+    deleted tag <a href="{{url}}" target="_blank">{{object}}</a> at
   {{/DeleteEvent}}
 {{/TagEvent}}
 {{#FollowEvent}} started following {{followee}} {{/FollowEvent}}
 {{#ForkApplyEvent}} applied fork commits at {{/ForkApplyEvent}}
-{{#PushEvent}} <a href="{{url}}">pushed</a> to {{/PushEvent}}
+{{#PushEvent}} <a href="{{url}}" target="_blank">pushed</a> to {{/PushEvent}}
 {{#ForkEvent}} forked {{/ForkEvent}}
 {{#WatchEvent}} started watching {{/WatchEvent}}
-{{#GollumEvent}} updated the Wiki for {{/GollumEvent}}
+{{#GollumEvent}} edited the wiki at {{/GollumEvent}}
 
 {{^FollowEvent}}
-  <a href="{{repourl}}"> {{repo}}</a>
+  <a href="{{repourl}}" target="_blank"> {{repo}}</a>
 {{/FollowEvent}}
 </li>
 {{/items}}
