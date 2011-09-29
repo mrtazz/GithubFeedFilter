@@ -29,9 +29,9 @@ class GithubFeedFilter
             ev[:followee] = ""
           end
 
-          if i["payload"]["object"].eql? "branch"
+          if i["payload"]["ref_type"].eql? "branch"
             ev["BranchEvent"] = true
-          elsif i["payload"]["object"].eql? "tag"
+          elsif i["payload"]["ref_type"].eql? "tag"
             ev["TagEvent"] = true
           end
           ev[i["type"]] = true
